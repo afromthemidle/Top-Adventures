@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "Reservation": {
+      "title": "Reservation",
+      "description": "A paid activity reservation",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "userName": {
+          "type": "string"
+        },
+        "userEmail": {
+          "type": "string"
+        },
+        "activityId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "PAID"
+          ]
+        },
+        "paymentOrderId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "date": {
+          "type": "string"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": [
+            "paypal",
+            "transfer"
+          ]
+        }
+      },
+      "required": [
+        "userId",
+        "activityId",
+        "status",
+        "createdAt",
+        "userName",
+        "userEmail",
+        "date"
+      ]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A chat message for an activity",
+      "type": "object",
+      "properties": {
+        "activityId": {
+          "type": "string"
+        },
+        "senderId": {
+          "type": "string"
+        },
+        "senderName": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "activityId",
+        "senderId",
+        "text",
+        "createdAt"
+      ]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "An activity template",
+      "type": "object",
+      "properties": {
+        "sport": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        },
+        "meetingPointName": {
+          "type": "string"
+        },
+        "meetingPointAddress": {
+          "type": "string"
+        },
+        "requiredGear": {
+          "type": "array"
+        },
+        "slotsTotal": {
+          "type": "number"
+        },
+        "image": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "itinerary": {
+          "type": "array"
+        },
+        "description": {
+          "type": "string"
+        },
+        "activityCost": {
+          "type": "string"
+        },
+        "availableDates": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "sport",
+        "city",
+        "time",
+        "slotsTotal"
+      ]
+    }
+  },
+  "firestore": {
+    "reservations/{reservationId}": {
+      "schema": {
+        "$ref": "#/entities/Reservation"
+      },
+      "description": "Stores user reservations for activities."
+    },
+    "messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/Message"
+      },
+      "description": "Stores chat messages for an activity."
+    },
+    "activities/{activityId}": {
+      "schema": {
+        "$ref": "#/entities/Activity"
+      },
+      "description": "Stores activities."
+    }
+  }
+}

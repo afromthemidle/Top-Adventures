@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    function isValidReservation(data) {
+      return data.keys().hasAll(['userId', 'activityId', 'status', 'createdAt', 'userName', 'userEmail', 'date']) &&
+             data.userId == request.auth.uid &&
+             data.activityId is string && data.activityId.size() <= 100 &&
+             data.date is string && data.date.size() <= 100 &&
+             data.status in ['PENDING', 'PAID'] &&
+             data.userName is string && data.userName.size() <= 100 &&
+             data.userEmail is string && data.userEmail.size() <= 100 &&
+             ((data.keys().hasAll(['paymentOrderId']) && data.paymentOrderId is string && data.paymentOrderId.size() <= 200) || !data.keys().hasAll(['paymentOrderId'])) &&
+             ((data.keys().hasAll(['paymentMethod']) && data.paymentMethod is string && data.paymentMethod.size() <= 100) || !data.keys().hasAll(['paymentMethod']));
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['activityId', 'senderId', 'text', 'createdAt']) &&
+             data.keys().size() >= 4 &&
+             data.activityId is string && data.activityId.size() <= 100 &&
+             data.senderId == request.auth.uid &&
+             data.text is string && data.text.size() <= 2000 &&
+             ((data.keys().hasAll(['senderName']) && data.senderName is string && data.senderName.size() <= 100) || !data.keys().hasAll(['senderName']));
+    }
+
+    match /reservations/{reservationId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(reservationId) && isValidReservation(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isValidReservation(incoming()) && existing().userId == request.auth.uid && incoming().userId == existing().userId && incoming().activityId == existing().activityId && incoming().createdAt == existing().createdAt && (
+        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paymentOrderId', 'paymentMethod']) && existing().status == 'PENDING')
+      );
+    }
+    
+    match /messages/{messageId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(messageId) && isValidMessage(incoming()) && incoming().createdAt == request.time;
+      allow update: if false; // immutable
+      allow delete: if false; 
+    }
+
+    match /activities/{activityId} {
+      allow read: if true;
+      allow write: if true; // Temporary for seeding
+    }
+  }
+}

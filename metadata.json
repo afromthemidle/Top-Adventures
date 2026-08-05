@@ -1,0 +1,10 @@
+{
+  "name": "Top Adventures",
+  "description": "Una aplicación móvil inspirada en Timeleft para conectar aventureros al aire libre a ciegas.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
