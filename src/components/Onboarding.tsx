@@ -30,6 +30,11 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const [profile, setProfile] = useState<Partial<UserProfile>>(existingProfile || {
     name: '',
@@ -74,6 +79,30 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
       icon: <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-8"><User className="w-10 h-10 text-emerald-600" /></div>,
       content: (
         <div className="space-y-4 w-full">
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button type="button" onClick={() => { setAuthMode('register'); setAuthError(null); }} className={`flex-1 py-2 text-sm font-bold rounded-lg ${authMode === 'register' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}>Crear cuenta</button>
+            <button type="button" onClick={() => { setAuthMode('login'); setAuthError(null); }} className={`flex-1 py-2 text-sm font-bold rounded-lg ${authMode === 'login' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}>Iniciar sesión</button>
+          </div>
+          <form onSubmit={async (event) => {
+            event.preventDefault();
+            setAuthError(null);
+            setIsAuthenticating(true);
+            try {
+              const { registerWithEmail, signInWithEmail } = await import('../firebase');
+              const result = authMode === 'register' ? await registerWithEmail(authEmail.trim(), authPassword) : await signInWithEmail(authEmail.trim(), authPassword);
+              setProfile({ name: result.user.displayName || 'Aventurero', contactValue: result.user.email || authEmail.trim(), contactMethod: 'email' });
+              setStep(1);
+            } catch (err: any) {
+              const code = err?.code || '';
+              setAuthError(code === 'auth/email-already-in-use' ? 'Este correo ya tiene una cuenta. Inicia sesión.' : code === 'auth/invalid-credential' || code === 'auth/wrong-password' ? 'El correo o la contraseña no son correctos.' : code === 'auth/weak-password' ? 'La contraseña debe tener al menos 6 caracteres.' : code === 'auth/invalid-email' ? 'Escribe un correo válido.' : 'No se pudo completar la autenticación. Verifica Firebase e inténtalo nuevamente.');
+            } finally { setIsAuthenticating(false); }
+          }} className="space-y-3">
+            <input aria-label="Correo electrónico" type="email" required autoComplete="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="Correo electrónico" className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-emerald-500" />
+            <input aria-label="Contraseña" type="password" required minLength={6} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="Contraseña (mínimo 6 caracteres)" className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-emerald-500" />
+            {authError && <p role="alert" className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">{authError}</p>}
+            <button type="submit" disabled={isAuthenticating} className="w-full py-3.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50">{isAuthenticating ? 'Procesando...' : authMode === 'register' ? 'Crear mi cuenta' : 'Iniciar sesión'}</button>
+          </form>
+          <div className="flex items-center gap-3 text-xs text-slate-400"><span className="h-px bg-slate-200 flex-1" />o<span className="h-px bg-slate-200 flex-1" /></div>
           <button 
             onClick={async () => {
                try {
