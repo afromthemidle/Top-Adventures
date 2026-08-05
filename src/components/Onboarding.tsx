@@ -36,6 +36,16 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user && !auth.currentUser?.isAnonymous) {
+        setProfile((current) => ({ ...current, name: user.displayName || current.name || 'Aventurero', contactValue: user.email || current.contactValue || '', contactMethod: 'email' }));
+        setStep((current) => current === 0 ? 1 : current);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [profile, setProfile] = useState<Partial<UserProfile>>(existingProfile || {
     name: '',
     contactMethod: 'email',
@@ -107,14 +117,8 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
             onClick={async () => {
                try {
                  const { signInWithGoogle } = await import('../firebase');
-                 const result = await signInWithGoogle();
-                 setProfile({
-                    name: result.user.displayName || 'Aventurero',
-                    contactValue: result.user.email || '',
-                    contactMethod: 'email'
-                 });
-                 // Go directly to payment step
-                 setStep(1);
+                 localStorage.setItem('pendingAdventure', selectedAdventure.id);
+                 await signInWithGoogle();
                } catch(err) {
                  console.error("Sign in failed", err);
                  alert("Hubo un error al iniciar sesión.");

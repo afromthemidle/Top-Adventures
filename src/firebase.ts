@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithRedirect, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -10,7 +10,8 @@ export const auth = getAuth(app);
 // Use this function when the user actively chooses to sign in
 export const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider();
-  return signInWithPopup(auth, provider);
+  provider.setCustomParameters({ prompt: 'select_account' });
+  return signInWithRedirect(auth, provider);
 };
 
 export const registerWithEmail = (email: string, password: string) => createUserWithEmailAndPassword(auth, email, password);

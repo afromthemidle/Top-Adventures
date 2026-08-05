@@ -144,7 +144,10 @@ export default function App() {
     );
   } else if (currentView === 'explore') {
     activeContent = (
-      <Explore onSelectAdventure={setSelectedTemplate} activities={activities} />
+      <Explore onSelectAdventure={(adventure) => {
+        localStorage.setItem('pendingAdventure', adventure.id);
+        setSelectedTemplate(adventure);
+      }} activities={activities} />
     );
   } else {
     activeContent = (
