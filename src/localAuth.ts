@@ -6,6 +6,7 @@ export type LocalUser = {
 
 type LocalAccount = LocalUser & { password: string };
 
+// Browser-persistent account provider used by the public app.
 const accountsKey = 'top-adventures.accounts.v1';
 const sessionKey = 'top-adventures.session.v1';
 
