@@ -1,3 +1,5 @@
+import canopyImage from '../assets/canopy.jpg?inline';
+
 export function getAdventureImage(sport: string, imageUrl?: string): string {
   // If the user provided a valid HTTP image URL, or a base64 data URI, or a blob URI, we MUST use it! This is likely their uploaded image.
   if (imageUrl && imageUrl.trim() !== '') {
@@ -10,7 +12,7 @@ export function getAdventureImage(sport: string, imageUrl?: string): string {
   const s = (sport || '').toLowerCase();
   
   if (s.includes('canopy') || s.includes('zipline') || s.includes('tirolesa')) {
-    return "/images/canopy.jpg";
+    return canopyImage;
   }
   if (s.includes('parapente') || s.includes('paragliding')) {
     return "/images/paragliding.jpg";
