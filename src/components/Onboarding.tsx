@@ -6,6 +6,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { localCurrentUser, loginLocal, registerLocal } from '../localAuth';
 
 const initialOptions = {
     clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "test",
@@ -98,8 +99,7 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
             setAuthError(null);
             setIsAuthenticating(true);
             try {
-              const { registerWithEmail, signInWithEmail } = await import('../firebase');
-              const result = authMode === 'register' ? await registerWithEmail(authEmail.trim(), authPassword) : await signInWithEmail(authEmail.trim(), authPassword);
+              const result = authMode === 'register' ? await registerLocal(authEmail, authPassword) : await loginLocal(authEmail, authPassword);
               setProfile({ name: result.user.displayName || 'Aventurero', contactValue: result.user.email || authEmail.trim(), contactMethod: 'email' });
               setStep(1);
             } catch (err: any) {
@@ -130,7 +130,7 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
           </button>
         </div>
       ),
-      isValid: !!auth.currentUser, // Only valid if they login (automatically advances)
+      isValid: !!localCurrentUser() || !!auth.currentUser,
     },
     {
       id: 'payment',
