@@ -150,7 +150,10 @@ export default function App() {
     );
   } else if (currentView === 'explore') {
     activeContent = (
-      <Explore onSelectAdventure={(adventure) => {
+      <Explore onAuthComplete={(user) => {
+        setProfile(user);
+        setCurrentView('dashboard');
+      }} onSelectAdventure={(adventure) => {
         localStorage.setItem('pendingAdventure', adventure.id);
         setSelectedTemplate(adventure);
       }} activities={activities} />
