@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithRedirect, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, getRedirectResult, signInWithRedirect, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -13,6 +13,8 @@ export const signInWithGoogle = () => {
   provider.setCustomParameters({ prompt: 'select_account' });
   return signInWithRedirect(auth, provider);
 };
+
+export const finishGoogleSignIn = () => getRedirectResult(auth);
 
 export const registerWithEmail = (email: string, password: string) => createUserWithEmailAndPassword(auth, email, password);
 export const signInWithEmail = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);

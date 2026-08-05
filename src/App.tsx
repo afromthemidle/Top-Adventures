@@ -7,7 +7,7 @@ import { mockParticipants } from './data/mocks';
 import { Adventure,UserProfile, AdventureTemplate } from './types';
 import { AnimatePresence } from 'motion/react';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from './firebase';
+import { db, auth, finishGoogleSignIn, handleFirestoreError, OperationType } from './firebase';
 
 export default function App() {
   const [profile, setProfile] = useState<UserProfile | null>(() => {
@@ -27,6 +27,12 @@ export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<AdventureTemplate | null>(null);
   const [adventures, setAdventures] = useState<Adventure[]>([]);
   const [newlyBookedActivityId, setNewlyBookedActivityId] = useState<string | null>(null);
+
+  useEffect(() => {
+    finishGoogleSignIn().catch((error) => {
+      console.error('Google sign-in redirect failed:', error);
+    });
+  }, []);
   
   useEffect(() => {
     const unsubActivities = onSnapshot(collection(db, 'activities'), (snapshot) => {
