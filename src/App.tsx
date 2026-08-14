@@ -3,11 +3,14 @@ import { Onboarding } from './components/Onboarding';
 import { Explore } from './components/Explore';
 import { Dashboard } from './components/Dashboard';
 import { BottomNav } from './components/BottomNav';
+import { AccountMenu } from './components/AccountMenu';
 import { mockParticipants } from './data/mocks';
 import { Adventure,UserProfile, AdventureTemplate } from './types';
 import { AnimatePresence } from 'motion/react';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth, finishGoogleSignIn, handleFirestoreError, OperationType } from './firebase';
+import { localCurrentUser, logoutLocal } from './localAuth';
+import { signOut } from 'firebase/auth';
 
 export default function App() {
   const [profile, setProfile] = useState<UserProfile | null>(() => {
@@ -135,6 +138,20 @@ export default function App() {
     }
   };
 
+  const handleLogout = async () => {
+    logoutLocal();
+    await signOut(auth).catch(() => undefined);
+    setProfile(null);
+    setAdventures([]);
+    setSelectedTemplate(null);
+    setCurrentView('explore');
+  };
+
+  const accountUser = profile || (() => {
+    const localUser = localCurrentUser();
+    return localUser ? { name: localUser.displayName, contactValue: localUser.email } : null;
+  })();
+
   let activeContent;
   if (selectedTemplate) {
     activeContent = (
@@ -174,6 +191,11 @@ export default function App() {
       
       {/* Mobile Device Frame styling for Desktop displays */}
       <div className="w-full h-[100dvh] sm:h-[844px] max-w-[390px] bg-white sm:rounded-[2.5rem] sm:shadow-2xl overflow-hidden relative flex flex-col items-stretch border-slate-800 sm:border-[8px]">
+        <AccountMenu
+          user={accountUser}
+          onLogout={handleLogout}
+          onOpenAccount={() => setCurrentView('explore')}
+        />
         {activeContent}
         
         {/* Only show bottom navigation if we are not booking */}

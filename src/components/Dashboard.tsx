@@ -1,11 +1,10 @@
 import { getAdventureImage } from '../utils/imageUtils';
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, MapPin, Users, Map, CheckCircle2, MessageSquare, Calendar, ChevronLeft, ChevronRight, Clock, CalendarPlus, LogOut } from 'lucide-react';
+import { ShieldAlert, MapPin, Users, Map, CheckCircle2, MessageSquare, Calendar, ChevronLeft, ChevronRight, Clock, CalendarPlus } from 'lucide-react';
 import { Adventure, UserProfile, Participant } from '../types';
 import { motion } from 'motion/react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db, auth } from '../firebase';
-import { signOut } from 'firebase/auth';
+import { db } from '../firebase';
 
 interface Props {
   adventures: Adventure[];
@@ -70,11 +69,8 @@ const [groupParticipants, setGroupParticipants] = useState<Participant[]>([]);
   if (!selectedAdventure) {
     return (
       <div className="flex-1 overflow-y-auto pb-24 h-full bg-slate-50 p-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 pr-12">
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Mis Actividades</h1>
-          <button onClick={() => signOut(auth)} className="p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
-            <LogOut className="w-5 h-5" />
-          </button>
         </div>
         <div className="space-y-4">
           {adventures.map(adv => (
