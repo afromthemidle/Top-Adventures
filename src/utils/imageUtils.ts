@@ -15,7 +15,7 @@ export function getAdventureImage(sport: string, imageUrl?: string): string {
     return canopyImage;
   }
   if (s.includes('parapente') || s.includes('paragliding')) {
-    return "/images/paragliding.jpg";
+    return "/images/paragliding_paute.png";
   }
   if (s.includes('rafting') || s.includes('kayak') || s.includes('río') || s.includes('rio')) {
     return "/images/rafting.jpg";
