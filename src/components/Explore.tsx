@@ -1,10 +1,9 @@
 import { getAdventureImage } from '../utils/imageUtils';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Calendar, Clock, Map, Users, ChevronDown, ChevronUp, Timer, Navigation, CheckCircle2, Mountain } from 'lucide-react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { AdventureTemplate } from '../types';
-import { loginLocal, registerLocal } from '../localAuth';
 
 interface Props {
   onSelectAdventure: (adv: AdventureTemplate) => void;
@@ -69,32 +68,6 @@ export function Explore({ onSelectAdventure, activities, onAuthComplete }: Props
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [participantsData, setParticipantsData] = useState<Record<string, any[]>>({});
   const [selectedDates, setSelectedDates] = useState<Record<string, number>>({});
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authMessage, setAuthMessage] = useState('');
-  const [authBusy, setAuthBusy] = useState(false);
-  const accountEmailRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (window.location.hash !== '#cuenta') return;
-    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
-    window.setTimeout(() => accountEmailRef.current?.focus(), 80);
-  }, []);
-
-  const submitAuth = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setAuthMessage('');
-    setAuthBusy(true);
-    try {
-      const result = authMode === 'register' ? await registerLocal(authEmail, authPassword) : await loginLocal(authEmail, authPassword);
-      onAuthComplete({ id: result.user.uid, name: result.user.displayName, contactValue: result.user.email, contactMethod: 'email' });
-    } catch (error) {
-      setAuthMessage(error instanceof Error ? error.message : 'No se pudo completar la operación.');
-    } finally {
-      setAuthBusy(false);
-    }
-  };
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -233,22 +206,6 @@ export function Explore({ onSelectAdventure, activities, onAuthComplete }: Props
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="mx-6 mt-5 rounded-3xl bg-slate-900 p-5 text-white shadow-lg">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-extrabold text-lg">Tu cuenta</h2>
-          <button type="button" className="text-xs text-emerald-300 font-bold" onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthMessage(''); }}>
-            {authMode === 'login' ? 'Crear cuenta' : 'Ya tengo cuenta'}
-          </button>
-        </div>
-        <p className="mb-3 text-sm text-slate-300">Inicia sesión o crea una cuenta para reservar y gestionar tus aventuras.</p>
-        <form onSubmit={submitAuth} className="space-y-3">
-          <input ref={accountEmailRef} aria-label="Correo" type="email" required value={authEmail} onChange={e => setAuthEmail(e.target.value)} placeholder="tu correo" className="w-full rounded-xl px-3 py-2 text-slate-900" />
-          <input aria-label="Contraseña" type="password" required minLength={6} value={authPassword} onChange={e => setAuthPassword(e.target.value)} placeholder="contraseña (mínimo 6 caracteres)" className="w-full rounded-xl px-3 py-2 text-slate-900" />
-          <button disabled={authBusy} className="w-full rounded-xl bg-emerald-500 py-2.5 font-extrabold disabled:opacity-50">{authBusy ? 'Procesando...' : authMode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</button>
-          {authMessage && <p className="text-sm text-amber-200" role="alert">{authMessage}</p>}
-        </form>
       </div>
 
       <div className="p-6 space-y-6">

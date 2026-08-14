@@ -4,6 +4,7 @@ import { Explore } from './components/Explore';
 import { Dashboard } from './components/Dashboard';
 import { BottomNav } from './components/BottomNav';
 import { AccountMenu } from './components/AccountMenu';
+import { AccountAccessModal } from './components/AccountAccessModal';
 import { mockParticipants } from './data/mocks';
 import { Adventure,UserProfile, AdventureTemplate } from './types';
 import { AnimatePresence } from 'motion/react';
@@ -30,6 +31,7 @@ export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<AdventureTemplate | null>(null);
   const [adventures, setAdventures] = useState<Adventure[]>([]);
   const [newlyBookedActivityId, setNewlyBookedActivityId] = useState<string | null>(null);
+  const [isAccountModalOpen, setAccountModalOpen] = useState(false);
 
   useEffect(() => {
     finishGoogleSignIn().catch((error) => {
@@ -194,9 +196,10 @@ export default function App() {
         <AccountMenu
           user={accountUser}
           onLogout={handleLogout}
-          onOpenAccount={() => { window.location.hash = 'cuenta'; setCurrentView('explore'); }}
+          onOpenAccount={() => { setCurrentView('explore'); setAccountModalOpen(true); }}
         />
         {activeContent}
+        {isAccountModalOpen && <AccountAccessModal onClose={() => setAccountModalOpen(false)} onComplete={(user) => { setProfile(user); setAccountModalOpen(false); setCurrentView('dashboard'); }} />}
         
         {/* Only show bottom navigation if we are not booking */}
         {!selectedTemplate && (
