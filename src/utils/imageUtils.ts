@@ -10,7 +10,7 @@ export function getAdventureImage(sport: string, imageUrl?: string): string {
   const s = (sport || '').toLowerCase();
   
   if (s.includes('canopy') || s.includes('zipline') || s.includes('tirolesa')) {
-    return "/images/canopy_bibin_safe.png";
+    return "/images/canopy_bibin_group.png";
   }
   if (s.includes('parapente') || s.includes('paragliding')) {
     return "/images/paragliding_paute_joy.png";
