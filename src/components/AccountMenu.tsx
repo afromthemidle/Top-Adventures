@@ -24,7 +24,7 @@ export function AccountMenu({ user, onLogout, onOpenAccount }: Props) {
         aria-label="Acceder a mi cuenta"
       >
         <LogIn className="h-4 w-4 text-emerald-600" />
-        Cuenta
+        Ingresar
       </button>
     );
   }

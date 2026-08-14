@@ -194,7 +194,7 @@ export default function App() {
         <AccountMenu
           user={accountUser}
           onLogout={handleLogout}
-          onOpenAccount={() => setCurrentView('explore')}
+          onOpenAccount={() => { window.location.hash = 'cuenta'; setCurrentView('explore'); }}
         />
         {activeContent}
         
