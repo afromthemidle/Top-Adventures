@@ -1,10 +1,21 @@
-export type Sport = 'Escalada / Bouldering' | 'Senderismo / Trail' | 'Surf' | 'Ciclismo / MTB' | 'Kayak / SUP' | 'Ciclismo Cumbayá' | 'Senderismo Cajas' | 'Escalada Cojitambo' | 'Actividad pasada/eliminada' | 'Canopy / Zipline' | 'Parapente';
+export type Sport =
+  | "Escalada / Bouldering"
+  | "Senderismo / Trail"
+  | "Surf"
+  | "Ciclismo / MTB"
+  | "Kayak / SUP"
+  | "Ciclismo Cumbayá"
+  | "Senderismo Cajas"
+  | "Escalada Cojitambo"
+  | "Actividad pasada/eliminada"
+  | "Canopy / Zipline"
+  | "Parapente";
 
 export interface UserProfile {
   name: string;
   city: string;
   interests: Sport[];
-  contactMethod?: 'email';
+  contactMethod?: "email";
   contactValue?: string;
 }
 
@@ -25,6 +36,7 @@ export interface AdventureTemplate {
   itinerary?: string[];
   description?: string;
   activityCost?: string;
+  internalCostPerPerson?: number;
 }
 
 export interface Participant {
@@ -59,8 +71,8 @@ export interface Adventure {
   description?: string;
   activityCost?: string;
   safetyTips?: string[];
-  status?: 'PENDING' | 'PAID' | 'REJECTED';
-  paymentMethod?: 'paypal' | 'transfer';
+  status?: "PENDING" | "PAID" | "REJECTED";
+  paymentMethod?: "paypal" | "transfer";
   participants: Participant[];
   messages: ChatMessage[];
 }
