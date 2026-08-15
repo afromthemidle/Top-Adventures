@@ -11,13 +11,14 @@ service cloud.firestore {
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
     function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && request.auth.token.email == 'andres.diaz.alvear@gmail.com'; }
 
     function isValidReservation(data) {
       return data.keys().hasAll(['userId', 'activityId', 'status', 'createdAt', 'userName', 'userEmail', 'date']) &&
              data.userId == request.auth.uid &&
              data.activityId is string && data.activityId.size() <= 100 &&
              data.date is string && data.date.size() <= 100 &&
-             data.status in ['PENDING', 'PAID'] &&
+             data.status in ['PENDING', 'PAID', 'REJECTED'] &&
              data.userName is string && data.userName.size() <= 100 &&
              data.userEmail is string && data.userEmail.size() <= 100 &&
              ((data.keys().hasAll(['paymentOrderId']) && data.paymentOrderId is string && data.paymentOrderId.size() <= 200) || !data.keys().hasAll(['paymentOrderId'])) &&
@@ -35,22 +36,23 @@ service cloud.firestore {
 
     match /reservations/{reservationId} {
       allow read: if true;
+      allow delete: if isAdmin();
       allow create: if isSignedIn() && isValidId(reservationId) && isValidReservation(incoming()) && incoming().createdAt == request.time;
-      allow update: if isSignedIn() && isValidReservation(incoming()) && existing().userId == request.auth.uid && incoming().userId == existing().userId && incoming().activityId == existing().activityId && incoming().createdAt == existing().createdAt && (
+      allow update: if isAdmin() || (isSignedIn() && isValidReservation(incoming()) && existing().userId == request.auth.uid && incoming().userId == existing().userId && incoming().activityId == existing().activityId && incoming().createdAt == existing().createdAt && (
         (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paymentOrderId', 'paymentMethod']) && existing().status == 'PENDING')
-      );
+      ));
     }
     
     match /messages/{messageId} {
       allow read: if true;
       allow create: if isSignedIn() && isValidId(messageId) && isValidMessage(incoming()) && incoming().createdAt == request.time;
-      allow update: if false; // immutable
-      allow delete: if false; 
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /activities/{activityId} {
       allow read: if true;
-      allow write: if true; // Temporary for seeding
+      allow write: if isAdmin();
     }
   }
 }
