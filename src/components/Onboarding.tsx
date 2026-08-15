@@ -5,7 +5,8 @@ import { ArrowRight, User, Mail, MessageCircle, CheckCircle2, Loader2, Calendar,
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, auth, storage, handleFirestoreError, OperationType } from '../firebase';
 import { localCurrentUser, loginLocal, registerLocal } from '../localAuth';
 
 const initialOptions = {
@@ -62,6 +63,14 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
     const usedProfile = profile.name ? profile : (JSON.parse(localStorage.getItem('pendingProfile') || '{}'));
     if (auth.currentUser) {
       try {
+        let receiptUrl = '';
+        let receiptName = '';
+        if (paymentId.startsWith('bank_transfer') && receiptFile) {
+          receiptName = receiptFile.name;
+          const receiptRef = ref(storage, `payment-receipts/${auth.currentUser.uid}/${Date.now()}-${receiptFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`);
+          const uploaded = await uploadBytes(receiptRef, receiptFile, { contentType: receiptFile.type });
+          receiptUrl = await getDownloadURL(uploaded.ref);
+        }
         const reservationData = {
           userId: auth.currentUser.uid,
           activityId: selectedAdventure.id,
@@ -71,7 +80,8 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
           paymentOrderId: paymentId,
           createdAt: serverTimestamp(),
           userName: usedProfile.name || 'Anonymous',
-          userEmail: usedProfile.contactValue || 'no-email@example.com'
+          userEmail: usedProfile.contactValue || 'no-email@example.com',
+          ...(receiptUrl ? { receiptUrl, receiptName } : {})
         };
         const docRef = await addDoc(collection(db, 'reservations'), reservationData);
         setReservationId(docRef.id);
