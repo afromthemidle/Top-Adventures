@@ -286,6 +286,19 @@ export function Onboarding({
         <div className="space-y-6 w-full text-center">
           <div className="bg-slate-50 p-6 rounded-2xl border border-emerald-200">
             <h4 className="font-bold text-slate-800 mb-4">Total a Pagar</h4>
+            <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-left">
+              <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">
+                Fecha de la actividad
+              </p>
+              <p className="mt-1 font-black capitalize text-indigo-900">
+                {selectedAdventure.date.toLocaleDateString("es-EC", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
             <div className="flex justify-between items-center py-2 border-b border-emerald-100">
               <span className="text-slate-600">Actividad Completa</span>
               <span className="font-bold text-emerald-700 text-xl">
