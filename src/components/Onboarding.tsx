@@ -312,54 +312,42 @@ export function Onboarding({ selectedAdventure, existingProfile, onComplete, onC
       setIsSuccess(true);
     };
 
-    const appLink = `${window.location.origin}/?view=dashboard&activity=${selectedAdventure.id}`;
+    const activityLink = `${window.location.origin}/?activity=${encodeURIComponent(selectedAdventure.id)}`;
+    const dateLabel = selectedAdventure.date.toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const detailsBlock = `
+      <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 12px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #047857;">Detalles de la actividad</h3>
+        <ul style="list-style: none; padding: 0; line-height: 1.8;">
+          <li><strong>Actividad:</strong> ${selectedAdventure.sport}</li>
+          <li><strong>Ciudad:</strong> ${selectedAdventure.city}</li>
+          <li><strong>Fecha:</strong> ${dateLabel}</li>
+          <li><strong>Hora:</strong> ${selectedAdventure.time}</li>
+          <li><strong>Punto de encuentro:</strong> ${selectedAdventure.meetingPointName} (${selectedAdventure.meetingPointAddress})</li>
+          ${selectedAdventure.duration ? `<li><strong>Duración aproximada:</strong> ${selectedAdventure.duration}</li>` : ''}
+          ${selectedAdventure.activityCost ? `<li><strong>Costo total:</strong> ${selectedAdventure.activityCost}</li>` : ''}
+        </ul>
+        ${selectedAdventure.requiredGear?.length ? `<h4 style="margin-bottom: 8px; color: #047857;">Material necesario</h4><ul style="line-height: 1.5;">${selectedAdventure.requiredGear.map(gear => `<li>${gear}</li>`).join('')}</ul>` : ''}
+        ${selectedAdventure.itinerary?.length ? `<h4 style="margin-bottom: 8px; color: #047857;">Itinerario</h4><ul style="line-height: 1.5;">${selectedAdventure.itinerary.map(step => `<li>${step}</li>`).join('')}</ul>` : ''}
+        ${selectedAdventure.description ? `<h4 style="margin-bottom: 8px; color: #047857;">Sobre la actividad</h4><p>${selectedAdventure.description}</p>` : ''}
+      </div>`;
     
     const userEmailPromise = fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           to: currentProfile.contactValue,
-          subject: paymentMethod === 'transfer' ? `Recibimos tu comprobante para ${selectedAdventure.sport}` : `Tu aventura de ${selectedAdventure.sport} confirmada 🚀`,
+          subject: paymentMethod === 'transfer' ? `Recibimos tu comprobante: ${selectedAdventure.sport}` : `Detalles de tu reserva: ${selectedAdventure.sport}`,
           html: `
             <div style="font-family: sans-serif; color: #333;">
               <h2>${paymentMethod === 'transfer' ? '¡Comprobante recibido!' : '¡Reserva confirmada!'}</h2>
               <p>Hola <strong>${currentProfile.name}</strong>,</p>
-              ${paymentMethod === 'transfer' 
-                ? `<p>Hemos recibido el comprobante de tu pago por transferencia para la aventura de <strong>${selectedAdventure.sport}</strong> en <strong>${selectedAdventure.city}</strong>.</p><p>Lo verificaremos en las próximas 3 horas (horario laborable) y confirmaremos tu cupo.</p>` 
-                : `<p>Has reservado exitosamente tu aventura de <strong>${selectedAdventure.sport}</strong> en <strong>${selectedAdventure.city}</strong>.</p>`}
-              
-              <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 12px; margin: 20px 0;">
-                <h3 style="margin-top: 0; color: #047857;">Detalles de la actividad:</h3>
-                <ul style="list-style: none; padding: 0; line-height: 1.6;">
-                  <li>📅 <strong>Fecha:</strong> ${selectedAdventure.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</li>
-                  <li>⏰ <strong>Hora:</strong> ${selectedAdventure.time}</li>
-                  <li>📍 <strong>Punto de encuentro:</strong> ${selectedAdventure.meetingPointName} (${selectedAdventure.meetingPointAddress})</li>
-                  ${selectedAdventure.duration ? `<li>⏳ <strong>Duración aproximada:</strong> ${selectedAdventure.duration}</li>` : ''}
-                  ${selectedAdventure.activityCost ? `<li>💰 <strong>Costo total:</strong> ${selectedAdventure.activityCost}<br/><span style="font-size: 12px; color: #047857;">(Incluye material para la actividad y guía. No incluye comida, transporte ni seguro de accidentes)</span></li>` : ''}
-                </ul>
-                <h4 style="margin-bottom: 8px; color: #047857;">Material necesario (deberás llevarlo el día de la actividad):</h4>
-                <ul style="margin-top: 0; line-height: 1.5;">
-                  ${selectedAdventure.requiredGear.map(gear => `<li>${gear}</li>`).join('')}
-                </ul>
-                ${selectedAdventure.itinerary && selectedAdventure.itinerary.length > 0 ? `
-                <h4 style="margin-bottom: 8px; color: #047857; margin-top: 16px;">Itinerario:</h4>
-                <ul style="margin-top: 0; line-height: 1.5; padding-left: 20px;">
-                  ${selectedAdventure.itinerary.map(step => `<li>${step}</li>`).join('')}
-                </ul>
-                ` : ''}
-                ${selectedAdventure.description ? `
-                <h4 style="margin-bottom: 8px; color: #047857; margin-top: 16px;">Sobre la actividad:</h4>
-                <p style="margin-top: 0; line-height: 1.5; font-style: italic; color: #475569;">
-                  ${selectedAdventure.description}
-                </p>
-                ` : ''}
-              </div>
-              <p>Para ver los detalles de tu ${paymentMethod === 'transfer' ? 'reserva' : 'confirmación'} en la app y prepararte, ingresa al siguiente enlace:</p>
+              ${paymentMethod === 'transfer' ? `<p>Hemos recibido tu comprobante de transferencia para <strong>${selectedAdventure.sport}</strong>. Tu reserva queda registrada como pendiente mientras verificamos el pago. Te enviaremos otro correo cuando el cupo quede confirmado.</p>` : `<p>Tu reserva ha sido registrada correctamente. Aquí tienes toda la información para preparar tu experiencia.</p>`}
+              ${detailsBlock}
+              <p>Consulta la actividad y sus detalles directamente en Top Adventures:</p>
               <p style="margin: 30px 0;">
-                <a href="${appLink}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Ver mi reserva en la web</a>
+                <a href="${activityLink}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Ver actividad en la web</a>
               </p>
-              
-              <p>¡Prepárate para la acción! 🏔️🏄‍♂️🚴‍♂️</p>
+              <p>Guarda este correo y llega con unos minutos de anticipación al punto de encuentro. ¡Prepárate para disfrutar la aventura!</p>
             </div>
           `
         })

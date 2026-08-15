@@ -55,6 +55,12 @@ export default function App() {
         } as AdventureTemplate;
       });
       setActivities(acts);
+
+      const linkedActivity = new URLSearchParams(window.location.search).get('activity');
+      if (linkedActivity) {
+        const found = acts.find(a => a.id === linkedActivity);
+        if (found) setSelectedTemplate(found);
+      }
       
       const pendingAdv = localStorage.getItem('pendingAdventure');
       if (pendingAdv) {
