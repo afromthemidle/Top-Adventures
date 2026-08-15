@@ -92,7 +92,17 @@ export default function App() {
         );
         if (linkedActivity) {
           const found = acts.find((a) => a.id === linkedActivity);
-          if (found) setSelectedTemplate(found);
+          const linkedDate = new URLSearchParams(window.location.search).get(
+            "date",
+          );
+          if (found) {
+            const parsedDate = linkedDate ? new Date(linkedDate) : null;
+            setSelectedTemplate(
+              parsedDate && !Number.isNaN(parsedDate.getTime())
+                ? { ...found, date: parsedDate }
+                : found,
+            );
+          }
         }
 
         const pendingAdv = localStorage.getItem("pendingAdventure");

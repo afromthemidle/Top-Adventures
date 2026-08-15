@@ -233,7 +233,7 @@ export function AdminDashboard({
       });
       const activity = activityById.get(r.activityId);
       const label = status === "PAID" ? "confirmada" : "rechazada";
-      const activityLink = `${window.location.origin}/?activity=${encodeURIComponent(r.activityId)}`;
+      const activityLink = `${window.location.origin}/?activity=${encodeURIComponent(r.activityId)}&date=${encodeURIComponent(r.date || "")}`;
       const dateLabel = r.date
         ? new Date(r.date).toLocaleDateString("es-EC", {
             weekday: "long",
