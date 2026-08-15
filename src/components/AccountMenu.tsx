@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CircleUserRound, LogIn, LogOut } from 'lucide-react';
+import { CircleUserRound, LayoutDashboard, LogIn, LogOut } from 'lucide-react';
 
 type AccountUser = {
   name?: string;
@@ -10,9 +10,11 @@ type Props = {
   user: AccountUser | null;
   onLogout: () => void;
   onOpenAccount: () => void;
+  isAdmin?: boolean;
+  onOpenAdmin?: () => void;
 };
 
-export function AccountMenu({ user, onLogout, onOpenAccount }: Props) {
+export function AccountMenu({ user, onLogout, onOpenAccount, isAdmin = false, onOpenAdmin }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!user) {
@@ -47,6 +49,16 @@ export function AccountMenu({ user, onLogout, onOpenAccount }: Props) {
             <p className="truncate text-sm font-bold text-slate-900">{user.name || 'Aventurero'}</p>
             <p className="truncate text-xs text-slate-500">{user.contactValue || 'Cuenta activa'}</p>
           </div>
+          {isAdmin && onOpenAdmin && (
+            <button
+              type="button"
+              onClick={() => { setIsOpen(false); onOpenAdmin(); }}
+              className="flex w-full items-center gap-2 border-b border-slate-100 px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-emerald-50"
+            >
+              <LayoutDashboard className="h-4 w-4 text-emerald-600" />
+              Administración
+            </button>
+          )}
           <button
             type="button"
             onClick={() => { setIsOpen(false); onLogout(); }}

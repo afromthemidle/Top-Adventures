@@ -5,6 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { BottomNav } from './components/BottomNav';
 import { AccountMenu } from './components/AccountMenu';
 import { AccountAccessModal } from './components/AccountAccessModal';
+import { AdminDashboard } from './components/AdminDashboard';
 import { mockParticipants } from './data/mocks';
 import { Adventure,UserProfile, AdventureTemplate } from './types';
 import { AnimatePresence } from 'motion/react';
@@ -12,6 +13,8 @@ import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp 
 import { db, auth, finishGoogleSignIn, handleFirestoreError, OperationType } from './firebase';
 import { localCurrentUser, logoutLocal } from './localAuth';
 import { signOut } from 'firebase/auth';
+
+const ADMIN_EMAIL = 'andres.diaz.alvear@gmail.com';
 
 export default function App() {
   const [profile, setProfile] = useState<UserProfile | null>(() => {
@@ -22,7 +25,7 @@ export default function App() {
     return null;
   });
 
-  const [currentView, setCurrentView] = useState<'explore' | 'dashboard'>(() => {
+  const [currentView, setCurrentView] = useState<'explore' | 'dashboard' | 'admin'>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('view') === 'dashboard' ? 'dashboard' : 'explore';
   });
@@ -32,6 +35,7 @@ export default function App() {
   const [adventures, setAdventures] = useState<Adventure[]>([]);
   const [newlyBookedActivityId, setNewlyBookedActivityId] = useState<string | null>(null);
   const [isAccountModalOpen, setAccountModalOpen] = useState(false);
+  const [firebaseEmail, setFirebaseEmail] = useState<string | null>(() => auth.currentUser?.email || null);
 
   useEffect(() => {
     finishGoogleSignIn().catch((error) => {
@@ -64,6 +68,7 @@ export default function App() {
 
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((user) => {
+      setFirebaseEmail(user?.email || null);
       if (!user) { setProfile(null); setAdventures([]); setCurrentView('explore'); }
       if (user) {
         setProfile(prev => {
@@ -153,9 +158,12 @@ export default function App() {
     const localUser = localCurrentUser();
     return localUser ? { name: localUser.displayName, contactValue: localUser.email } : null;
   })();
+  const isAdministrator = firebaseEmail?.toLowerCase() === ADMIN_EMAIL;
 
   let activeContent;
-  if (selectedTemplate) {
+  if (currentView === 'admin') {
+    activeContent = isAdministrator ? <AdminDashboard activities={activities} /> : <Explore onAuthComplete={(user) => { setProfile(user); setCurrentView('dashboard'); }} onSelectAdventure={(adventure) => { localStorage.setItem('pendingAdventure', adventure.id); setSelectedTemplate(adventure); }} activities={activities} />;
+  } else if (selectedTemplate) {
     activeContent = (
       <Onboarding
         selectedAdventure={selectedTemplate}
@@ -188,6 +196,8 @@ export default function App() {
     );
   }
 
+  if (currentView === 'admin' && isAdministrator) return activeContent;
+
   return (
     <div className="min-h-screen bg-slate-900 font-sans sm:px-4 sm:py-8 flex justify-center items-center">
       
@@ -197,6 +207,8 @@ export default function App() {
           user={accountUser}
           onLogout={handleLogout}
           onOpenAccount={() => { setCurrentView('explore'); setAccountModalOpen(true); }}
+          isAdmin={isAdministrator}
+          onOpenAdmin={() => setCurrentView('admin')}
         />
         {activeContent}
         {isAccountModalOpen && <AccountAccessModal onClose={() => setAccountModalOpen(false)} onComplete={(user) => { setProfile(user); setAccountModalOpen(false); setCurrentView('dashboard'); }} />}
