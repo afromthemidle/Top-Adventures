@@ -196,7 +196,18 @@ export default function App() {
     );
   }
 
-  if (currentView === 'admin' && isAdministrator) return activeContent;
+  if (currentView === 'admin' && isAdministrator) return (
+    <div className="relative min-h-screen bg-slate-50">
+      <AccountMenu
+        user={accountUser}
+        onLogout={handleLogout}
+        onOpenAccount={() => setAccountModalOpen(true)}
+        isAdmin
+        onOpenAdmin={() => setCurrentView('admin')}
+      />
+      {activeContent}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-900 font-sans sm:px-4 sm:py-8 flex justify-center items-center">
