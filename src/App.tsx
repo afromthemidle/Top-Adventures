@@ -58,7 +58,7 @@ export default function App() {
   const [adventures, setAdventures] = useState<Adventure[]>([]);
   const [newlyBookedActivityId, setNewlyBookedActivityId] = useState<
     string | null
-  >(null);
+  >(() => new URLSearchParams(window.location.search).get("activity"));
   const [isAccountModalOpen, setAccountModalOpen] = useState(false);
   const [firebaseEmail, setFirebaseEmail] = useState<string | null>(
     () => auth.currentUser?.email || null,
