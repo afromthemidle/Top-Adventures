@@ -491,105 +491,128 @@ export function AdminDashboard({
                   key={group.activity}
                   className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
                 >
-                  <div className="border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
-                    <h2 className="font-black">{group.activity}</h2>
-                    <p className="text-xs text-slate-300">
-                      {group.dates.reduce(
-                        (total, [, items]) => total + items.length,
-                        0,
-                      )}{" "}
-                      reserva(s)
-                    </p>
-                  </div>
-                  <div className="space-y-4 p-4">
-                    {group.dates.map(([date, items]) => (
-                      <div key={date}>
-                        <div className="mb-3 flex items-center gap-2">
-                          <CalendarDays className="h-4 w-4 text-emerald-600" />
-                          <h3 className="font-black text-slate-800">{date}</h3>
-                          <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
-                            {items.length}
-                          </span>
+                  <details className="group">
+                    <summary className="cursor-pointer list-none border-b border-slate-200 bg-slate-950 px-4 py-3 text-white transition hover:bg-slate-800">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <h2 className="font-black">{group.activity}</h2>
+                          <p className="text-xs text-slate-300">
+                            {group.dates.reduce(
+                              (total, [, items]) => total + items.length,
+                              0,
+                            )}{" "}
+                            reserva(s)
+                          </p>
                         </div>
-                        <div className="space-y-3">
-                          {items.map((r) => (
-                            <article
-                              key={r.id}
-                              className="rounded-xl border border-slate-200 p-4"
-                            >
-                              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                                <div>
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="font-black">
-                                      {r.userName || "Cliente"}
-                                    </h4>
-                                    <Badge status={r.status} />
-                                  </div>
-                                  <p className="text-sm text-slate-500">
-                                    {r.userEmail} ·{" "}
-                                    {money.format(
-                                      amount(
-                                        activityById.get(r.activityId)
-                                          ?.activityCost,
-                                      ),
-                                    )}
-                                  </p>
-                                  {r.receiptUrl ? (
-                                    <a
-                                      href={r.receiptUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="mt-3 inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700"
-                                    >
-                                      <FileImage className="h-4 w-4" />
-                                      Ver comprobante{" "}
-                                      {r.receiptName
-                                        ? `(${r.receiptName})`
-                                        : ""}
-                                    </a>
-                                  ) : (
-                                    r.paymentMethod === "transfer" && (
-                                      <p className="mt-3 text-sm font-semibold text-amber-700">
-                                        No se encontró el archivo adjunto.
-                                      </p>
-                                    )
-                                  )}
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                  {r.status === "PENDING" && (
-                                    <>
-                                      <button
-                                        onClick={() => updateStatus(r, "PAID")}
-                                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-bold text-white"
-                                      >
-                                        <CheckCircle2 className="h-4 w-4" />
-                                        Aprobar
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          updateStatus(r, "REJECTED")
-                                        }
-                                        className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700"
-                                      >
-                                        <XCircle className="h-4 w-4" />
-                                        Rechazar
-                                      </button>
-                                    </>
-                                  )}
-                                  <button
-                                    onClick={() => remove("reservations", r.id)}
-                                    className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            </article>
-                          ))}
-                        </div>
+                        <span className="text-lg transition-transform group-open:rotate-180">
+                          ⌄
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                    </summary>
+                    <div className="space-y-4 p-4">
+                      {group.dates.map(([date, items]) => (
+                        <details
+                          key={date}
+                          className="group/date overflow-hidden rounded-xl border border-slate-200"
+                        >
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 bg-slate-50 px-4 py-3 transition hover:bg-slate-100">
+                            <div className="flex items-center gap-2">
+                              <CalendarDays className="h-4 w-4 text-emerald-600" />
+                              <h3 className="font-black text-slate-800">
+                                {date}
+                              </h3>
+                              <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
+                                {items.length}
+                              </span>
+                            </div>
+                            <span className="text-slate-500 transition-transform group-open/date:rotate-180">
+                              ⌄
+                            </span>
+                          </summary>
+                          <div className="space-y-3 p-3">
+                            {items.map((r) => (
+                              <article
+                                key={r.id}
+                                className="rounded-xl border border-slate-200 p-4"
+                              >
+                                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                  <div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <h4 className="font-black">
+                                        {r.userName || "Cliente"}
+                                      </h4>
+                                      <Badge status={r.status} />
+                                    </div>
+                                    <p className="text-sm text-slate-500">
+                                      {r.userEmail} ·{" "}
+                                      {money.format(
+                                        amount(
+                                          activityById.get(r.activityId)
+                                            ?.activityCost,
+                                        ),
+                                      )}
+                                    </p>
+                                    {r.receiptUrl ? (
+                                      <a
+                                        href={r.receiptUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="mt-3 inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700"
+                                      >
+                                        <FileImage className="h-4 w-4" />
+                                        Ver comprobante{" "}
+                                        {r.receiptName
+                                          ? `(${r.receiptName})`
+                                          : ""}
+                                      </a>
+                                    ) : (
+                                      r.paymentMethod === "transfer" && (
+                                        <p className="mt-3 text-sm font-semibold text-amber-700">
+                                          No se encontró el archivo adjunto.
+                                        </p>
+                                      )
+                                    )}
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {r.status === "PENDING" && (
+                                      <>
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(r, "PAID")
+                                          }
+                                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-bold text-white"
+                                        >
+                                          <CheckCircle2 className="h-4 w-4" />
+                                          Aprobar
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            updateStatus(r, "REJECTED")
+                                          }
+                                          className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700"
+                                        >
+                                          <XCircle className="h-4 w-4" />
+                                          Rechazar
+                                        </button>
+                                      </>
+                                    )}
+                                    <button
+                                      onClick={() =>
+                                        remove("reservations", r.id)
+                                      }
+                                      className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+                  </details>
                 </section>
               ))}
             </div>
