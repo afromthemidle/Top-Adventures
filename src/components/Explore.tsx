@@ -84,7 +84,10 @@ export function Explore({ onSelectAdventure, activities, onAuthComplete }: Props
 
   useEffect(() => {
     const actIds = activities.filter(a => a.city === city).map(a => a.id);
-    if (actIds.length === 0) return;
+    if (actIds.length === 0) {
+      setParticipantsData({});
+      return;
+    }
 
     const unsubs = actIds.map(id => {
       const q = query(collection(db, 'reservations'), where('activityId', '==', id));
@@ -101,7 +104,7 @@ export function Explore({ onSelectAdventure, activities, onAuthComplete }: Props
     });
 
     return () => unsubs.forEach(u => u());
-  }, [city]);
+  }, [city, activities]);
 
   const filteredAdventures = activities.filter(a => a.city === city);
 
