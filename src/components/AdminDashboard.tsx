@@ -205,7 +205,8 @@ export function AdminDashboard({
     filteredReservations.forEach((r) => {
       const activity =
         activityById.get(r.activityId)?.sport || "Actividad eliminada";
-      const date = r.date || "Sin fecha planificada";
+      // La agrupación usa únicamente la fecha planificada de la actividad; la hora se ignora.
+      const date = r.date ? r.date.slice(0, 10) : "Sin fecha planificada";
       const group = groups.get(activity) || {
         activity,
         dates: new Map<string, Reservation[]>(),
