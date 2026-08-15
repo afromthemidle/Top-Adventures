@@ -1,6 +1,6 @@
 type AssetFetcher = { fetch(request: Request): Promise<Response> };
 
-type WorkerEnv = { ASSETS: AssetFetcher; RESEND_API_KEY?: string };
+type WorkerEnv = { ASSETS: AssetFetcher; RESEND_API_KEY?: string; EMAIL_FROM?: string };
 
 async function sendEmail(request: Request, env: WorkerEnv) {
   try {
@@ -10,7 +10,7 @@ async function sendEmail(request: Request, env: WorkerEnv) {
     const result = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: 'Top Adventures <onboarding@resend.dev>', to: [to], subject, html }),
+      body: JSON.stringify({ from: env.EMAIL_FROM || 'Top Adventures <onboarding@resend.dev>', to: [to], subject, html }),
     });
     const data = await result.json();
     return Response.json({ success: result.ok, data, error: result.ok ? undefined : data?.message }, { status: result.ok ? 200 : 502 });
