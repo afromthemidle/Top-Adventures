@@ -23,6 +23,7 @@ interface Props {
   user: UserProfile;
   initialAdventureId?: string | null;
   onClearInitial?: () => void;
+  onRetryPayment?: (activityId: string) => void;
 }
 
 export function Dashboard({
@@ -30,6 +31,7 @@ export function Dashboard({
   user,
   initialAdventureId,
   onClearInitial,
+  onRetryPayment,
 }: Props) {
   const [selectedAdventureId, setSelectedAdventureId] = useState<string | null>(
     null,
@@ -229,6 +231,18 @@ export function Dashboard({
                 ? "Pendiente de verificación de pago"
                 : "Pendiente de Pago"}
           </div>
+
+          {adventure.status !== "PAID" && onRetryPayment && (
+            <button
+              type="button"
+              onClick={() =>
+                onRetryPayment(adventure.activityId || adventure.id)
+              }
+              className="mb-4 block w-full rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800 transition-colors hover:bg-emerald-100"
+            >
+              Adjuntar nuevamente el comprobante de pago
+            </button>
+          )}
 
           <h1 className="text-3xl font-black text-slate-900 mb-2 leading-tight tracking-tight">
             {adventure.sport}
