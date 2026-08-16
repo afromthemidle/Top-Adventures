@@ -3,9 +3,12 @@ import { getAuth, getRedirectResult, signInWithPopup, GoogleAuthProvider, create
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import firebaseConfig from '../firebase-applet-config.json';
+import stagingFirebaseConfig from '../firebase-applet-config.staging.json';
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+const isStaging = typeof window !== 'undefined' && window.location.hostname.includes('top-adventures-staging');
+const activeFirebaseConfig = isStaging ? stagingFirebaseConfig : firebaseConfig;
+const app = initializeApp(activeFirebaseConfig);
+export const db = isStaging ? getFirestore(app) : getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
