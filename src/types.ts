@@ -37,6 +37,8 @@ export interface AdventureTemplate {
   description?: string;
   activityCost?: string;
   internalCostPerPerson?: number;
+  minimumParticipants?: number;
+  maximumParticipants?: number;
 }
 
 export interface Participant {
@@ -73,6 +75,8 @@ export interface Adventure {
   safetyTips?: string[];
   status?: "PENDING" | "PAID" | "REJECTED";
   paymentMethod?: "paypal" | "transfer";
+  minimumParticipants?: number;
+  maximumParticipants?: number;
   participants: Participant[];
   messages: ChatMessage[];
 }

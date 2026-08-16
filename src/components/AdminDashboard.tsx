@@ -884,6 +884,31 @@ export function AdminDashboard({
                     className="mt-1 w-full rounded-xl border border-slate-200 p-3"
                   />
                 </label>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <label className="text-sm font-bold">
+                    Mínimo de participantes
+                    <input
+                      type="number"
+                      min="1"
+                      value={editing.minimumParticipants ?? 4}
+                      onChange={(e) => setEditing({ ...editing, minimumParticipants: Number(e.target.value) })}
+                      className="mt-1 w-full rounded-xl border border-slate-200 p-3"
+                    />
+                  </label>
+                  <label className="text-sm font-bold">
+                    Máximo de participantes
+                    <input
+                      type="number"
+                      min="1"
+                      value={editing.maximumParticipants ?? 10}
+                      onChange={(e) => setEditing({ ...editing, maximumParticipants: Number(e.target.value) })}
+                      className="mt-1 w-full rounded-xl border border-slate-200 p-3"
+                    />
+                  </label>
+                </div>
+                <p className="rounded-xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
+                  Si no se alcanza el mínimo o el clima impide la actividad, el cliente podrá elegir reprogramación sin costo o devolución. Coordina la opción elegida desde la reserva.
+                </p>
               </div>
               <div className="mt-5 flex justify-end gap-2">
                 <button

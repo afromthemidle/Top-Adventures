@@ -309,6 +309,10 @@ export function Onboarding({
                 })}
               </p>
             </div>
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm text-amber-900">
+              <p className="font-bold">Condiciones de salida</p>
+              <p className="mt-1">La actividad se confirma con mínimo 4 participantes y admite hasta 10. Si no se alcanza el mínimo o el clima impide realizarla, podrás elegir reprogramación sin costo o solicitar la devolución.</p>
+            </div>
             <div className="flex justify-between items-center py-2 border-b border-emerald-100">
               <span className="text-slate-600">Actividad Completa</span>
               <span className="font-bold text-emerald-700 text-xl">

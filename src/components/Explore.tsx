@@ -190,7 +190,7 @@ export function Explore({ onSelectAdventure, activities, onAuthComplete }: Props
           </h1>
           <div className="max-w-2xl">
             <p className="text-slate-500 text-lg md:text-xl font-light leading-relaxed tracking-wide">
-              Cada semana, juntamos a grupos de <strong className="font-semibold text-slate-800">6 personas</strong> que comparten los mismos intereses.
+              Cada semana, juntamos grupos de hasta <strong className="font-semibold text-slate-800">10 personas</strong> que comparten los mismos intereses.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2">
               <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full font-medium text-sm border border-emerald-100">
@@ -240,7 +240,9 @@ export function Explore({ onSelectAdventure, activities, onAuthComplete }: Props
               const actualCount = actualParticipantsData.length;
               // Removed baseParticipants
               const displayParticipants = actualCount;
-              const computedSlotsAvailable = Math.max(0, adv.slotsTotal - displayParticipants);
+              const minimumParticipants = adv.minimumParticipants ?? 4;
+              const maximumParticipants = adv.maximumParticipants ?? 10;
+              const computedSlotsAvailable = Math.max(0, maximumParticipants - displayParticipants);
 
               return (
               <div key={adv.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100/60 active:scale-[0.98] transition-transform flex flex-col">
@@ -314,6 +316,9 @@ export function Explore({ onSelectAdventure, activities, onAuthComplete }: Props
                         </div>
                         <div className="text-[11px] text-emerald-700/80 font-medium flex items-center">
                           Disponibilidad actualizada para la fecha seleccionada
+                        </div>
+                        <div className="border-t border-emerald-200 pt-2 text-[11px] leading-relaxed text-emerald-800">
+                          <strong>Salida confirmada desde {minimumParticipants} personas</strong> · máximo {maximumParticipants}. Si no se alcanza el mínimo o el clima impide realizarla, podrás elegir reprogramación sin costo o devolución.
                         </div>
                       </div>
                     ) : (
