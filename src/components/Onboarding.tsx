@@ -23,6 +23,7 @@ import {
   OperationType,
 } from "../firebase";
 import { localCurrentUser, loginLocal, registerLocal } from "../localAuth";
+import { defaultPaymentSettings, subscribePaymentSettings, type PaymentSettings } from "../paymentSettings";
 
 const initialOptions = {
   clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "test",
@@ -57,6 +58,9 @@ export function Onboarding({
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>(defaultPaymentSettings);
+
+  useEffect(() => subscribePaymentSettings(setPaymentSettings), []);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -84,6 +88,12 @@ export function Onboarding({
   const [paymentMethod, setPaymentMethod] = useState<"paypal" | "transfer">(
     "paypal",
   );
+  useEffect(() => {
+    if (!paymentSettings[paymentMethod]) {
+      const next = paymentSettings.paypal ? "paypal" : paymentSettings.transfer ? "transfer" : null;
+      if (next) setPaymentMethod(next);
+    }
+  }, [paymentMethod, paymentSettings]);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const isEcuador = ["Cuenca", "Quito", "Guayaquil", "Baños"].includes(
     selectedAdventure.city,
@@ -315,18 +325,24 @@ export function Onboarding({
               <div className="w-full">
                 {isEcuador && (
                   <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
-                    <button
+                    {paymentSettings.paypal && <button
                       onClick={() => setPaymentMethod("paypal")}
                       className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${paymentMethod === "paypal" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                     >
                       Tarjeta / PayPal
-                    </button>
-                    <button
+                    </button>}
+                    {paymentSettings.transfer && <button
                       onClick={() => setPaymentMethod("transfer")}
                       className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${paymentMethod === "transfer" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                     >
                       Transferencia
-                    </button>
+                    </button>}
+                  </div>
+                )}
+
+                {!paymentSettings.paypal && !paymentSettings.transfer && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+                    En este momento no hay métodos de pago disponibles. Intenta nuevamente más tarde.
                   </div>
                 )}
 
@@ -347,7 +363,7 @@ export function Onboarding({
                     </div>
                   )}
 
-                  {paymentMethod === "paypal" || !isEcuador ? (
+                  {paymentSettings.paypal && (paymentMethod === "paypal" || !isEcuador) ? (
                     <div
                       className={
                         isCapturing ? "opacity-50 pointer-events-none" : ""
@@ -432,7 +448,7 @@ export function Onboarding({
                         />
                       </PayPalScriptProvider>
                     </div>
-                  ) : (
+                  ) : paymentSettings.transfer ? (
                     <div className="bg-white border border-slate-200 rounded-xl p-5 text-left shadow-sm">
                       <h4 className="font-bold text-slate-800 mb-3 text-center border-b border-slate-100 pb-2">
                         Datos para Transferencia
@@ -492,7 +508,7 @@ export function Onboarding({
                         Confirmar Pago por Transferencia
                       </button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>

@@ -10,6 +10,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock3,
+  CreditCard,
   Database,
   DollarSign,
   FileImage,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 import { db } from "../firebase";
 import { AdventureTemplate } from "../types";
+import { defaultPaymentSettings, savePaymentSettings, subscribePaymentSettings, type PaymentSettings } from "../paymentSettings";
 
 type Reservation = {
   id: string;
@@ -52,7 +54,8 @@ type Tab =
   | "users"
   | "activities"
   | "transactions"
-  | "messages";
+  | "messages"
+  | "payments";
 const money = new Intl.NumberFormat("es-EC", {
   style: "currency",
   currency: "USD",
@@ -101,6 +104,8 @@ export function AdminDashboard({
   const [messages, setMessages] = useState<Record<string, unknown>[]>([]);
   const [editing, setEditing] = useState<AdventureTemplate | null>(null);
   const [notice, setNotice] = useState("");
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>(defaultPaymentSettings);
+  const [savingPaymentSettings, setSavingPaymentSettings] = useState(false);
   const activityById = useMemo(
     () => new Map(activityRows.map((a) => [a.id, a])),
     [activityRows],
@@ -118,6 +123,7 @@ export function AdminDashboard({
     [],
   );
   useEffect(() => setActivityRows(activities), [activities]);
+  useEffect(() => subscribePaymentSettings(setPaymentSettings), []);
   useEffect(() => {
     activities
       .filter(
@@ -310,6 +316,19 @@ export function AdminDashboard({
     setEditing(null);
     setNotice("Actividad guardada");
   };
+  const updatePaymentMethod = async (method: keyof PaymentSettings, enabled: boolean) => {
+    const next = { ...paymentSettings, [method]: enabled };
+    setPaymentSettings(next);
+    setSavingPaymentSettings(true);
+    try {
+      await savePaymentSettings(next);
+      setNotice("Métodos de pago actualizados");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "No se pudo guardar la configuración");
+    } finally {
+      setSavingPaymentSettings(false);
+    }
+  };
   const nav: [Tab, string, ReactNode][] = [
     ["overview", "Resumen", <LayoutDashboard />],
     ["reservations", "Reservas", <ReceiptText />],
@@ -317,6 +336,7 @@ export function AdminDashboard({
     ["activities", "Actividades", <Database />],
     ["transactions", "Transacciones", <DollarSign />],
     ["messages", "Mensajes", <FileImage />],
+    ["payments", "Métodos de pago", <CreditCard />],
   ];
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-8">
@@ -733,6 +753,43 @@ export function AdminDashboard({
                 </tr>
               ))}
             </Table>
+          </Panel>
+        )}
+        {tab === "payments" && (
+          <Panel title="Métodos de pago públicos">
+            <p className="mb-5 text-sm text-slate-500">
+              Controla qué opciones pueden utilizar los clientes al reservar. Los cambios se aplican inmediatamente en la web pública.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {([[
+                "paypal",
+                "Tarjeta / PayPal",
+                "Permite pagos con PayPal o tarjeta.",
+              ], [
+                "transfer",
+                "Transferencia bancaria",
+                "Permite adjuntar comprobantes para revisión.",
+              ]] as const).map(([method, label, description]) => (
+                <label key={method} className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <span>
+                    <span className="block font-black">{label}</span>
+                    <span className="mt-1 block text-sm text-slate-500">{description}</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={paymentSettings[method]}
+                    disabled={savingPaymentSettings}
+                    onChange={(event) => updatePaymentMethod(method, event.target.checked)}
+                    className="mt-1 h-5 w-5 accent-emerald-600"
+                  />
+                </label>
+              ))}
+            </div>
+            {!paymentSettings.paypal && !paymentSettings.transfer && (
+              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800">
+                No hay métodos activos: los clientes no podrán completar nuevas reservas.
+              </p>
+            )}
           </Panel>
         )}
         {tab === "messages" && (
