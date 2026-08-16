@@ -1,7 +1,10 @@
 export function getAdventureImage(sport: string, imageUrl?: string): string {
   // If the user provided a valid HTTP image URL, or a base64 data URI, or a blob URI, we MUST use it! This is likely their uploaded image.
   if (imageUrl && imageUrl.trim() !== '') {
-    if (imageUrl.startsWith('http') || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:') || imageUrl.startsWith('/')) {
+    // Imported production records may contain stale `/assets/images/...` paths
+    // that are not part of the current static bundle. Keep only current public
+    // image paths; stale paths fall through to the activity-specific fallback.
+    if (imageUrl.startsWith('http') || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:') || imageUrl.startsWith('/images/')) {
       return imageUrl;
     }
   }
