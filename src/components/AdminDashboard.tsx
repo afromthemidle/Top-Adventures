@@ -200,7 +200,7 @@ export function AdminDashboard({
   const groupedReservations = useMemo(() => {
     const groups = new Map<
       string,
-      { activity: string; dates: Map<string, Reservation[]> }
+      { activity: string; dates: Map<string, Reservation[]>; pending: number }
     >();
     filteredReservations.forEach((r) => {
       const activity =
@@ -210,8 +210,10 @@ export function AdminDashboard({
       const group = groups.get(activity) || {
         activity,
         dates: new Map<string, Reservation[]>(),
+        pending: 0,
       };
       group.dates.set(date, [...(group.dates.get(date) || []), r]);
+      if (r.status === "PENDING") group.pending += 1;
       groups.set(activity, group);
     });
     return [...groups.values()]
@@ -496,7 +498,14 @@ export function AdminDashboard({
                     <summary className="cursor-pointer list-none border-b border-slate-200 bg-slate-950 px-4 py-3 text-white transition hover:bg-slate-800">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <h2 className="font-black">{group.activity}</h2>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="font-black">{group.activity}</h2>
+                            {group.pending > 0 && (
+                              <span className="rounded-full bg-amber-400 px-2 py-1 text-[11px] font-black text-amber-950">
+                                {group.pending} pendiente{group.pending === 1 ? "" : "s"} de aprobar
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-slate-300">
                             {group.dates.reduce(
                               (total, [, items]) => total + items.length,
@@ -517,7 +526,7 @@ export function AdminDashboard({
                           className="group/date overflow-hidden rounded-xl border border-slate-200"
                         >
                           <summary className="flex cursor-pointer list-none items-center justify-between gap-3 bg-slate-50 px-4 py-3 transition hover:bg-slate-100">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <CalendarDays className="h-4 w-4 text-emerald-600" />
                               <h3 className="font-black text-slate-800">
                                 {date}
@@ -525,6 +534,11 @@ export function AdminDashboard({
                               <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
                                 {items.length}
                               </span>
+                              {items.filter((item) => item.status === "PENDING").length > 0 && (
+                                <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-black text-amber-800">
+                                  {items.filter((item) => item.status === "PENDING").length} pendiente{items.filter((item) => item.status === "PENDING").length === 1 ? "" : "s"}
+                                </span>
+                              )}
                             </div>
                             <span className="text-slate-500 transition-transform group-open/date:rotate-180">
                               ⌄
