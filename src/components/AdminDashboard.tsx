@@ -72,6 +72,22 @@ const defaultInternalCost = (activity?: AdventureTemplate) =>
       ? 25
       : 0);
 
+const sendEmail = async (payload: Record<string, unknown>) => {
+  const response = await fetch("/api/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const result = (await response.json()) as {
+    success?: boolean;
+    error?: string;
+  };
+  if (!response.ok || !result.success) {
+    throw new Error(result.error || `El proveedor de correo respondió ${response.status}.`);
+  }
+  return result;
+};
+
 export function AdminDashboard({
   activities,
 }: {
@@ -258,10 +274,7 @@ export function AdminDashboard({
       const adminDetail = `<div style="font-family:Arial,sans-serif;color:#334155;line-height:1.6"><h2>Reserva ${label}</h2><p>La reserva de <strong>${r.userName || "cliente"}</strong> (${r.userEmail || "sin correo"}) fue ${label}.</p><ul><li><strong>Actividad:</strong> ${activity?.sport || "—"}</li><li><strong>Ciudad:</strong> ${activity?.city || "—"}</li><li><strong>Fecha:</strong> ${dateLabel}</li><li><strong>Hora:</strong> ${activity?.time || "—"}</li><li><strong>Costo:</strong> ${activity?.activityCost || "—"}</li></ul></div>`;
       await Promise.all([
         r.userEmail
-          ? fetch("/api/send-email", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
+          ? sendEmail({
                 to: r.userEmail,
                 subject:
                   status === "PAID"
@@ -269,17 +282,12 @@ export function AdminDashboard({
                     : `Reserva rechazada: comprobante no identificado - ${activity?.sport || "actividad"}`,
                 html: detail,
                 ...(attachments ? { attachments } : {}),
-              }),
             })
           : Promise.resolve(),
-        fetch("/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        sendEmail({
             to: "andres.diaz.alvear@gmail.com",
             subject: `Reserva ${label}: ${activity?.sport || "actividad"}`,
             html: adminDetail,
-          }),
         }),
       ]);
       setNotice("Reserva actualizada y notificaciones enviadas");
